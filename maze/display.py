@@ -1,16 +1,22 @@
-from typing import List
-
-
-def display_maze(maze: List[List[int]]) -> None:
+def display_maze(maze):
 
     height = len(maze)
     width = len(maze[0])
 
     for y in range(height):
 
-        line = ""
+        top = ""
+        mid = ""
 
         for x in range(width):
-            line += "[]"
 
-        print(line)
+            cell = maze[y][x]
+
+            top += "+---" if cell & 1 else "+   "
+
+            mid += "|   " if cell & 8 else "    "
+
+        print(top + "+")
+        print(mid + "|")
+
+    print("+---" * width + "+")

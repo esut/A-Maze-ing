@@ -1,4 +1,7 @@
-from .config_parser import parse_config
+"""
+Maze package
+Provides tools to generate, solve and display mazes.
+"""
+
 from .maze_generator import MazeGenerator
 from .maze_solver import solve_maze
-from .maze_writer import write_maze

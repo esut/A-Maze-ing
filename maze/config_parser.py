@@ -1,8 +1,12 @@
 from typing import Dict, Tuple
 
 
-def parse_config(filename: str) -> Dict[str, object]:
-    config: Dict[str, object] = {}
+def parse_config(filename: str) -> Dict:
+    """
+    Read configuration file and return a dictionary.
+    """
+
+    config: Dict = {}
 
     with open(filename, "r") as file:
         for line in file:
@@ -14,19 +18,15 @@ def parse_config(filename: str) -> Dict[str, object]:
             key, value = line.split("=")
             config[key] = value
 
-    width = int(config["WIDTH"])
-    height = int(config["HEIGHT"])
+    config["WIDTH"] = int(config["WIDTH"])
+    config["HEIGHT"] = int(config["HEIGHT"])
 
-    entry = tuple(map(int, config["ENTRY"].split(",")))
-    exit = tuple(map(int, config["EXIT"].split(",")))
+    x, y = config["ENTRY"].split(",")
+    config["ENTRY"] = (int(x), int(y))
 
-    seed = int(config["SEED"])
+    x, y = config["EXIT"].split(",")
+    config["EXIT"] = (int(x), int(y))
 
-    return {
-        "WIDTH": width,
-        "HEIGHT": height,
-        "ENTRY": entry,
-        "EXIT": exit,
-        "OUTPUT_FILE": config["OUTPUT_FILE"],
-        "SEED": seed,
-    }
+    config["PERFECT"] = config["PERFECT"].lower() == "true"
+
+    return config

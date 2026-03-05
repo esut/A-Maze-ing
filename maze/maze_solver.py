@@ -1,25 +1,20 @@
 from collections import deque
-from typing import List, Tuple
 
 
-def solve_maze(
-    maze: List[List[int]],
-    start: Tuple[int, int],
-    end: Tuple[int, int],
-) -> str:
+def solve_maze(maze, start, end):
 
-    width = len(maze[0])
     height = len(maze)
-
-    moves = {
-        "N": (0, -1, 1),
-        "E": (1, 0, 2),
-        "S": (0, 1, 4),
-        "W": (-1, 0, 8),
-    }
+    width = len(maze[0])
 
     queue = deque([(start, "")])
-    visited = set()
+    visited = set([start])
+
+    directions = [
+        (0, -1, 1, "N"),
+        (1, 0, 2, "E"),
+        (0, 1, 4, "S"),
+        (-1, 0, 8, "W")
+    ]
 
     while queue:
 
@@ -28,20 +23,17 @@ def solve_maze(
         if (x, y) == end:
             return path
 
-        if (x, y) in visited:
-            continue
+        for dx, dy, wall, letter in directions:
 
-        visited.add((x, y))
-
-        for direction, (dx, dy, wall) in moves.items():
-
-            if maze[y][x] & wall == 0:
+            if maze[y][x] & wall:
                 continue
 
             nx = x + dx
             ny = y + dy
 
-            if 0 <= nx < width and 0 <= ny < height:
-                queue.append(((nx, ny), path + direction))
+            if (nx, ny) not in visited:
+
+                visited.add((nx, ny))
+                queue.append(((nx, ny), path + letter))
 
     return ""

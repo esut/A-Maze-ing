@@ -1,28 +1,48 @@
 import random
-from typing import List
 
 
 class MazeGenerator:
+    """
+    Generate a maze using recursive backtracking.
+    """
 
-    def __init__(self, width: int, height: int, seed: int) -> None:
+    def __init__(self, width: int, height: int, seed: int | None = None):
         self.width = width
         self.height = height
-        random.seed(seed)
 
-    def generate(self) -> List[List[int]]:
-        maze = [[0 for _ in range(self.width)] for _ in range(self.height)]
+        if seed is not None:
+            random.seed(seed)
 
-        for y in range(self.height):
-            for x in range(self.width):
+        self.maze = [[15 for _ in range(width)] for _ in range(height)]
+        self.visited = [[False for _ in range(width)] for _ in range(height)]
 
-                if x < self.width - 1:
-                    if random.choice([True, False]):
-                        maze[y][x] |= 2
-                        maze[y][x + 1] |= 8
+    def generate(self) -> list[list[int]]:
+        self._dfs(0, 0)
+        return self.maze
 
-                if y < self.height - 1:
-                    if random.choice([True, False]):
-                        maze[y][x] |= 4
-                        maze[y + 1][x] |= 1
+    def _dfs(self, x: int, y: int):
 
-        return maze
+        self.visited[y][x] = True
+
+        directions = [
+            (0, -1, 1, 4),   # N
+            (1, 0, 2, 8),    # E
+            (0, 1, 4, 1),    # S
+            (-1, 0, 8, 2)    # W
+        ]
+
+        random.shuffle(directions)
+
+        for dx, dy, wall, opposite in directions:
+
+            nx = x + dx
+            ny = y + dy
+
+            if 0 <= nx < self.width and 0 <= ny < self.height:
+
+                if not self.visited[ny][nx]:
+
+                    self.maze[y][x] &= ~wall
+                    self.maze[ny][nx] &= ~opposite
+
+                    self._dfs(nx, ny)

@@ -1,16 +1,13 @@
 import sys
 
-from maze import (
-    parse_config,
-    MazeGenerator,
-    solve_maze,
-    write_maze,
-)
-
+from maze.config_parser import parse_config
+from maze.maze_generator import MazeGenerator
+from maze.maze_solver import solve_maze
+from maze.maze_writer import write_maze
 from maze.display import display_maze
 
 
-def main() -> None:
+def main():
 
     if len(sys.argv) != 2:
         print("Usage: python3 a_maze_ing.py config.txt")
@@ -18,20 +15,19 @@ def main() -> None:
 
     config = parse_config(sys.argv[1])
 
-    width = config["WIDTH"]
-    height = config["HEIGHT"]
-    seed = config["SEED"]
+    gen = MazeGenerator(config["WIDTH"], config["HEIGHT"])
 
-    entry = config["ENTRY"]
-    exit = config["EXIT"]
+    maze = gen.generate()
 
-    generator = MazeGenerator(width, height, seed)
+    path = solve_maze(maze, config["ENTRY"], config["EXIT"])
 
-    maze = generator.generate()
-
-    path = solve_maze(maze, entry, exit)
-
-    write_maze(maze, config["OUTPUT_FILE"], path)
+    write_maze(
+        config["OUTPUT_FILE"],
+        maze,
+        config["ENTRY"],
+        config["EXIT"],
+        path
+    )
 
     display_maze(maze)
 
