@@ -1,22 +1,30 @@
-def display_maze(maze):
 
-    height = len(maze)
-    width = len(maze[0])
+import curses
+from typing import List
 
-    for y in range(height):
+def display_maze(maze: List[List[int]]):
 
-        top = ""
-        mid = ""
+    def main(stdscr):
+        curses.curs_set(0)  
+        stdscr.clear()
+        height = len(maze)
+        width = len(maze[0])
 
-        for x in range(width):
+        for y in range(height):
+            top = ""
+            mid = ""
+            for x in range(width):
+                cell = maze[y][x]
+                top += "+---" if cell & 1 else "+   "
+                mid += "|   " if cell & 8 else "    "
 
-            cell = maze[y][x]
+          
+            stdscr.addstr(y*2, 0, top + "+")
+            stdscr.addstr(y*2 + 1, 0, mid + "|")
 
-            top += "+---" if cell & 1 else "+   "
+        
+        stdscr.addstr(height*2, 0, "+---" * width + "+")
+        stdscr.refresh()
+        stdscr.getch() 
 
-            mid += "|   " if cell & 8 else "    "
-
-        print(top + "+")
-        print(mid + "|")
-
-    print("+---" * width + "+")
+    curses.wrapper(main)

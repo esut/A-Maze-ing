@@ -8,7 +8,7 @@ debug:
 	python3 -m pdb a_maze_ing.py config.txt
 
 clean:
-	rm -rf __pycache__
+	rm -rf maze/__pycache__
 	rm -rf .mypy_cache
 
 lint:

@@ -3,7 +3,7 @@ def write_maze(filename, maze, entry, exit, path):
     with open(filename, "w") as f:
 
         for row in maze:
-            line = " ".join(format(cell, "x") for cell in row)
+            line = "".join(format(cell, "x") for cell in row)
             f.write(line + "\n")
 
         f.write("\n")
