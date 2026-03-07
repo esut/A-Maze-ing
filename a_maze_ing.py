@@ -7,26 +7,19 @@ from maze.display import display_maze
 
 
 def validate_config(config: dict) -> None:
-    """
-    Validate configuration values.
-    """
-
-    width = config["WIDTH"]
+    """Validate configuration values."""
+    width  = config["WIDTH"]
     height = config["HEIGHT"]
-
-    entry = config["ENTRY"]
-    exit = config["EXIT"]
+    entry  = config["ENTRY"]
+    exit_  = config["EXIT"]
 
     if width <= 0 or height <= 0:
         raise ValueError("WIDTH and HEIGHT must be positive integers")
-
     if not (0 <= entry[0] < width and 0 <= entry[1] < height):
         raise ValueError("ENTRY coordinates are outside the maze")
-
-    if not (0 <= exit[0] < width and 0 <= exit[1] < height):
+    if not (0 <= exit_[0] < width and 0 <= exit_[1] < height):
         raise ValueError("EXIT coordinates are outside the maze")
-
-    if entry == exit:
+    if entry == exit_:
         raise ValueError("ENTRY and EXIT must be different")
 
 
@@ -40,48 +33,43 @@ def main() -> None:
 
     try:
         config = parse_config(config_file)
-
         validate_config(config)
 
-        seed = config.get("SEED", None)
+        seed    = config.get("SEED", None)
+        entry   = config["ENTRY"]
+        exit_   = config["EXIT"]
+        perfect = config["PERFECT"]
 
-        generator = MazeGenerator(
-            config["WIDTH"],
-            config["HEIGHT"],
-            seed
-        )
+        # Generate maze
+        generator = MazeGenerator(config["WIDTH"], config["HEIGHT"], seed)
+        maze = generator.generate(entry=entry, exit_=exit_, perfect=perfect)
 
-        maze = generator.generate()
+        # Solve
+        path = solve_maze(maze, entry, exit_)
 
-        path = solve_maze(
-            maze,
-            config["ENTRY"],
-            config["EXIT"]
-        )
-
-        write_maze(
-            config["OUTPUT_FILE"],
-            maze,
-            config["ENTRY"],
-            config["EXIT"],
-            path
-        )
+        # Write output file
+        write_maze(config["OUTPUT_FILE"], maze, entry, exit_, path)
 
         print("\nMaze generated successfully\n")
+        print("Shortest path:", path)
 
-        display_maze(maze)
-
-        print("\nShortest path:", path)
+        # Display interactively
+        display_maze(
+            maze,
+            entry=entry,
+            exit_=exit_,
+            maze_width=config["WIDTH"],
+            maze_height=config["HEIGHT"],
+            perfect=perfect,
+            seed=seed,
+        )
 
     except FileNotFoundError:
         print(f"Error: file '{config_file}' not found")
-
     except ValueError as e:
         print("Configuration error:", e)
-
     except KeyError as e:
         print(f"Missing configuration key: {e}")
-
     except Exception as e:
         print("Unexpected error:", e)
 
