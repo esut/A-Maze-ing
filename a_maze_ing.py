@@ -58,8 +58,8 @@ def main() -> None:
             maze,
             entry=entry,
             exit_=exit_,
-            maze_width=config["WIDTH"],
-            maze_height=config["HEIGHT"],
+            width=config["WIDTH"],
+            height=config["HEIGHT"],
             perfect=perfect,
             seed=seed,
         )
