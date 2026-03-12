@@ -40,20 +40,16 @@ def main() -> None:
         exit_   = config["EXIT"]
         perfect = config["PERFECT"]
 
-        # Generate maze
         generator = MazeGenerator(config["WIDTH"], config["HEIGHT"], seed)
         maze = generator.generate(entry=entry, exit_=exit_, perfect=perfect)
 
-        # Solve
         path = solve_maze(maze, entry, exit_)
 
-        # Write output file
         write_maze(config["OUTPUT_FILE"], maze, entry, exit_, path)
 
         print("\nMaze generated successfully\n")
         print("Shortest path:", path)
 
-        # Display interactively
         display_maze(
             maze,
             entry=entry,

@@ -44,7 +44,6 @@ def generate_maze(width, height, entry, exit_, seed=None):
     sys.setrecursionlimit(width * height * 2 + 100)
     carve(0, 0)
 
-    # Open the outer border wall at entry and exit
     ex, ey = entry
     fx, fy = exit_
     if ey == 0:
@@ -78,7 +77,6 @@ def find_shortest_path(maze, entry, exit_):
         cx, cy = queue.popleft()
 
         if (cx, cy) == (fx, fy):
-            # Rebuild path by following parent links
             path = []
             cur  = (fx, fy)
             while cur is not None:
@@ -110,7 +108,6 @@ def get_42_cells(width, height):
     if width < 9 or height < 7:
         return []
 
-    # Center the 7x5 pattern in the maze
     ox = (width  - 7) // 2
     oy = (height - 5) // 2
 
@@ -147,7 +144,6 @@ def embed_42_pattern(maze, width, height, entry, exit_):
 
     blocked = set(cells)
 
-    # Close all 4 walls of every '42' cell and sync its neighbours
     for x, y in cells:
         maze[y][x] = 15
         if y > 0:          maze[y-1][x] |= SOUTH
@@ -155,27 +151,22 @@ def embed_42_pattern(maze, width, height, entry, exit_):
         if x > 0:          maze[y][x-1] |= EAST
         if x < width - 1:  maze[y][x+1] |= WEST
 
-    # If the path still exists, we are done
     if find_shortest_path(maze, entry, exit_) is not None:
         return True
 
-    # Path is broken — carve a guaranteed bypass using column 0
-    # (the leftmost column is never part of the '42' block)
+
     entry_x, entry_y = entry
     exit_x,  exit_y  = exit_
 
-    # 1. Open the full left column top to bottom
     for r in range(height - 1):
         maze[r][0]     &= ~SOUTH
         maze[r + 1][0] &= ~NORTH
 
-    # 2. Open the entry row from column 0 to the entry cell
     for x in range(entry_x):
         if (x, entry_y) not in blocked and (x + 1, entry_y) not in blocked:
             maze[entry_y][x]     &= ~EAST
             maze[entry_y][x + 1] &= ~WEST
 
-    # 3. Open the exit row from column 0 to the exit cell
     for x in range(exit_x):
         if (x, exit_y) not in blocked and (x + 1, exit_y) not in blocked:
             maze[exit_y][x]     &= ~EAST

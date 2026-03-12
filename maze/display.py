@@ -9,7 +9,6 @@ from .maze_generator import (
     get_42_cells,
 )
 
-# Color pair IDs
 WALL  = 1
 PATH  = 2
 ENTRY = 3
@@ -18,7 +17,6 @@ C42   = 5
 MENU  = 6
 BG    = 7
 
-# Wall color themes: (foreground, background)
 THEMES = [
     (curses.COLOR_WHITE,   curses.COLOR_BLACK),
     (curses.COLOR_YELLOW,  curses.COLOR_BLACK),
@@ -79,7 +77,6 @@ def draw_maze(scr, maze, entry, exit_, path_set, cells_42):
             except curses.error:
                 pass
 
-        # Right border
         try:
             right = "|" if (maze[y][width - 1] & EAST) else " "
             scr.addstr(y * 2,     width * 4, "+",   wall_col)
@@ -87,7 +84,6 @@ def draw_maze(scr, maze, entry, exit_, path_set, cells_42):
         except curses.error:
             pass
 
-    # Bottom border
     for x in range(width):
         bot = "---" if (maze[height - 1][x] & SOUTH) else "   "
         try:
