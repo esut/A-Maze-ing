@@ -1,4 +1,5 @@
 import sys
+from typing import Dict, Any, Optional
 from maze.config_parser import parse_config
 from maze.maze_generator import MazeGenerator
 from maze.maze_solver import solve_maze
@@ -6,12 +7,19 @@ from maze.maze_writer import write_maze
 from maze.display import display_maze
 
 
-def validate_config(config: dict) -> None:
-    """Validate configuration values."""
-    width  = config["WIDTH"]
-    height = config["HEIGHT"]
-    entry  = config["ENTRY"]
-    exit_  = config["EXIT"]
+def validate_config(config: Dict[str, Any]) -> None:
+    """Validate configuration values.
+    
+    Args:
+        config: Configuration dictionary
+    
+    Raises:
+        ValueError: If configuration values are invalid
+    """
+    width: int = config["WIDTH"]
+    height: int = config["HEIGHT"]
+    entry: tuple[int, int] = config["ENTRY"]
+    exit_: tuple[int, int] = config["EXIT"]
 
     if width <= 0 or height <= 0:
         raise ValueError("WIDTH and HEIGHT must be positive integers")
@@ -24,26 +32,26 @@ def validate_config(config: dict) -> None:
 
 
 def main() -> None:
-
+    """Main entry point for the maze generator."""
     if len(sys.argv) != 2:
         print("Usage: python3 a_maze_ing.py config.txt")
         sys.exit(1)
 
-    config_file = sys.argv[1]
+    config_file: str = sys.argv[1]
 
     try:
-        config = parse_config(config_file)
+        config: Dict[str, Any] = parse_config(config_file)
         validate_config(config)
 
-        seed    = config.get("SEED", None)
-        entry   = config["ENTRY"]
-        exit_   = config["EXIT"]
-        perfect = config["PERFECT"]
+        seed: Optional[int] = config.get("SEED", None)
+        entry: tuple[int, int] = config["ENTRY"]
+        exit_: tuple[int, int] = config["EXIT"]
+        perfect: bool = config["PERFECT"]
 
-        generator = MazeGenerator(config["WIDTH"], config["HEIGHT"], seed)
+        generator: MazeGenerator = MazeGenerator(config["WIDTH"], config["HEIGHT"], seed)
         maze = generator.generate(entry=entry, exit_=exit_, perfect=perfect)
 
-        path = solve_maze(maze, entry, exit_)
+        path: str = solve_maze(maze, entry, exit_)
 
         write_maze(config["OUTPUT_FILE"], maze, entry, exit_, path)
 

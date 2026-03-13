@@ -1,12 +1,12 @@
-from typing import Dict, Tuple
+from typing import Dict, Any
 
 
-def parse_config(filename: str) -> Dict:
+def parse_config(filename: str) -> Dict[str, Any]:
     """
     Read configuration file and return a dictionary.
     """
 
-    config: Dict = {}
+    config: Dict[str, Any] = {}
 
     with open(filename, "r") as file:
         for line in file:

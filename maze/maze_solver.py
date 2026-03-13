@@ -1,15 +1,25 @@
+from typing import List, Tuple, Set
 from collections import deque
 
 
-def solve_maze(maze, start, end):
+def solve_maze(
+        maze: List[List[int]],
+        start: Tuple[int, int],
+        end: Tuple[int, int]) -> str:
+    """Solve the maze using BFS and return the path as a string.
 
-    height = len(maze)
-    width = len(maze[0])
+    Args:
+        maze: 2D grid where each cell is a bitmask of walls
+        start: Starting coordinates (x, y)
+        end: Ending coordinates (x, y)
 
-    queue = deque([(start, "")])
-    visited = set([start])
+    Returns:
+        String of directions (N, E, S, W) or empty string if no path
+    """
+    queue: deque[Tuple[Tuple[int, int], str]] = deque([(start, "")])
+    visited: Set[Tuple[int, int]] = set([start])
 
-    directions = [
+    directions: List[Tuple[int, int, int, str]] = [
         (0, -1, 1, "N"),
         (1, 0, 2, "E"),
         (0, 1, 4, "S"),
@@ -28,8 +38,8 @@ def solve_maze(maze, start, end):
             if maze[y][x] & wall:
                 continue
 
-            nx = x + dx
-            ny = y + dy
+            nx: int = x + dx
+            ny: int = y + dy
 
             if (nx, ny) not in visited:
 

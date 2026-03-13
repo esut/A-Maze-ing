@@ -1,16 +1,17 @@
 import sys
 import random
 from collections import deque
+from typing import List, Tuple, Optional, Dict, Set
 
 # Each cell stores which walls are closed as 4 bits
-NORTH = 1
-EAST  = 2
-SOUTH = 4
-WEST  = 8
+NORTH: int = 1
+EAST: int = 2
+SOUTH: int = 4
+WEST: int = 8
 
-OPPOSITE = {NORTH: SOUTH, SOUTH: NORTH, EAST: WEST, WEST: EAST}
+OPPOSITE: Dict[int, int] = {NORTH: SOUTH, SOUTH: NORTH, EAST: WEST, WEST: EAST}
 
-MOVES = [
+MOVES: List[Tuple[int, int, int]] = [
     (0, -1, NORTH),
     (1,  0, EAST),
     (0,  1, SOUTH),
@@ -18,21 +19,31 @@ MOVES = [
 ]
 
 
-def generate_maze(width, height, entry, exit_, seed=None):
+def generate_maze(width: int, height: int, entry: Tuple[int, int], exit_: Tuple[int, int], seed: Optional[int] = None) -> List[List[int]]:
     """Generate a maze using DFS (recursive backtracker).
 
     Every cell starts with all 4 walls closed (value 15).
     The algorithm carves passages by removing shared walls.
     Returns a 2D grid where each cell is a bitmask (0-15).
+    
+    Args:
+        width: Maze width in cells
+        height: Maze height in cells
+        entry: Entry coordinates (x, y)
+        exit_: Exit coordinates (x, y)
+        seed: Random seed for reproducibility
+    
+    Returns:
+        2D list of integers representing wall bitmasks
     """
-    rng = random.Random(seed)
+    rng: random.Random = random.Random(seed)
 
-    maze    = [[15] * width for _ in range(height)]
-    visited = [[False] * width for _ in range(height)]
+    maze: List[List[int]] = [[15] * width for _ in range(height)]
+    visited: List[List[bool]] = [[False] * width for _ in range(height)]
 
-    def carve(x, y):
+    def carve(x: int, y: int) -> None:
         visited[y][x] = True
-        dirs = MOVES[:]
+        dirs: List[Tuple[int, int, int]] = MOVES[:]
         rng.shuffle(dirs)
         for dx, dy, wall in dirs:
             nx, ny = x + dx, y + dy
@@ -58,27 +69,33 @@ def generate_maze(width, height, entry, exit_, seed=None):
     return maze
 
 
-def find_shortest_path(maze, entry, exit_):
+def find_shortest_path(maze: List[List[int]], entry: Tuple[int, int], exit_: Tuple[int, int]) -> Optional[List[Tuple[int, int]]]:
     """Find the shortest path from entry to exit using BFS.
 
-    Returns a list of (x, y) cells, or None if no path exists.
+    Args:
+        maze: 2D grid where each cell is a bitmask of walls
+        entry: Entry coordinates (x, y)
+        exit_: Exit coordinates (x, y)
+    
+    Returns:
+        List of (x, y) cells forming the path, or None if no path exists
     """
-    height = len(maze)
-    width  = len(maze[0])
+    height: int = len(maze)
+    width: int = len(maze[0])
     ex, ey = entry
     fx, fy = exit_
 
-    visited = [[False] * width for _ in range(height)]
-    parent  = {(ex, ey): None}
-    queue   = deque([(ex, ey)])
+    visited: List[List[bool]] = [[False] * width for _ in range(height)]
+    parent: Dict[Tuple[int, int], Optional[Tuple[int, int]]] = {(ex, ey): None}
+    queue: deque[Tuple[int, int]] = deque([(ex, ey)])
     visited[ey][ex] = True
 
     while queue:
         cx, cy = queue.popleft()
 
         if (cx, cy) == (fx, fy):
-            path = []
-            cur  = (fx, fy)
+            path: List[Tuple[int, int]] = []
+            cur: Optional[Tuple[int, int]] = (fx, fy)
             while cur is not None:
                 path.append(cur)
                 cur = parent[cur]
@@ -100,23 +117,28 @@ def find_shortest_path(maze, entry, exit_):
     return None
 
 
-def get_42_cells(width, height):
+def get_42_cells(width: int, height: int) -> List[Tuple[int, int]]:
     """Return the cells that form '42' centered in the maze.
 
-    Returns [] if the maze is too small to fit the pattern.
+    Args:
+        width: Maze width in cells
+        height: Maze height in cells
+    
+    Returns:
+        List of (x, y) coordinates, or empty list if maze is too small
     """
     if width < 9 or height < 7:
         return []
 
-    ox = (width  - 7) // 2
-    oy = (height - 5) // 2
+    ox: int = (width  - 7) // 2
+    oy: int = (height - 5) // 2
 
-    four = [
+    four: List[Tuple[int, int]] = [
         (0, 0), (0, 1), (0, 2),
         (1, 2),
         (2, 0), (2, 1), (2, 2), (2, 3), (2, 4),
     ]
-    two = [
+    two: List[Tuple[int, int]] = [
         (0, 0), (1, 0), (2, 0),
         (2, 1),
         (0, 2), (1, 2), (2, 2),
@@ -124,7 +146,7 @@ def get_42_cells(width, height):
         (0, 4), (1, 4), (2, 4),
     ]
 
-    cells = []
+    cells: List[Tuple[int, int]] = []
     for dx, dy in four:
         cells.append((ox + dx, oy + dy))
     for dx, dy in two:
@@ -133,16 +155,24 @@ def get_42_cells(width, height):
     return [(x, y) for x, y in cells if 0 <= x < width and 0 <= y < height]
 
 
-def embed_42_pattern(maze, width, height, entry, exit_):
+def embed_42_pattern(maze: List[List[int]], width: int, height: int, entry: Tuple[int, int], exit_: Tuple[int, int]) -> bool:
     """Stamp '42' into the maze and fix the path if it got broken.
 
-    Returns True if placed, False if the maze is too small.
+    Args:
+        maze: 2D grid where each cell is a bitmask of walls
+        width: Maze width in cells
+        height: Maze height in cells
+        entry: Entry coordinates (x, y)
+        exit_: Exit coordinates (x, y)
+    
+    Returns:
+        True if pattern was placed, False if maze is too small
     """
-    cells = get_42_cells(width, height)
+    cells: List[Tuple[int, int]] = get_42_cells(width, height)
     if not cells:
         return False
 
-    blocked = set(cells)
+    blocked: Set[Tuple[int, int]] = set(cells)
 
     for x, y in cells:
         maze[y][x] = 15
@@ -184,26 +214,46 @@ class MazeGenerator:
         path = gen.get_solution()
     """
 
-    def __init__(self, width, height, seed=None):
-        self.width  = width
-        self.height = height
-        self.seed   = seed
-        self.maze   = None
-        self.entry  = (0, 0)
-        self.exit_  = (width - 1, height - 1)
+    def __init__(self, width: int, height: int, seed: Optional[int] = None) -> None:
+        """Initialize the maze generator.
+        
+        Args:
+            width: Maze width in cells
+            height: Maze height in cells
+            seed: Random seed for reproducibility
+        """
+        self.width: int = width
+        self.height: int = height
+        self.seed: Optional[int] = seed
+        self.maze: Optional[List[List[int]]] = None
+        self.entry: Tuple[int, int] = (0, 0)
+        self.exit_: Tuple[int, int] = (width - 1, height - 1)
 
-    def generate(self, entry=(0, 0), exit_=None, perfect=True):
-        """Generate a new maze and embed the '42' pattern."""
+    def generate(self, entry: Tuple[int, int] = (0, 0), exit_: Optional[Tuple[int, int]] = None, perfect: bool = True) -> List[List[int]]:
+        """Generate a new maze and embed the '42' pattern.
+        
+        Args:
+            entry: Entry coordinates (x, y)
+            exit_: Exit coordinates (x, y), defaults to bottom-right
+            perfect: Whether to generate a perfect maze
+        
+        Returns:
+            2D list of integers representing wall bitmasks
+        """
         if exit_ is None:
             exit_ = (self.width - 1, self.height - 1)
         self.entry = entry
         self.exit_ = exit_
-        self.maze  = generate_maze(self.width, self.height, entry, exit_, self.seed)
+        self.maze = generate_maze(self.width, self.height, entry, exit_, self.seed)
         embed_42_pattern(self.maze, self.width, self.height, entry, exit_)
         return self.maze
 
-    def get_solution(self):
-        """Return the shortest path in the current maze."""
+    def get_solution(self) -> Optional[List[Tuple[int, int]]]:
+        """Return the shortest path in the current maze.
+        
+        Returns:
+            List of (x, y) cells forming the path, or None if no maze generated
+        """
         if self.maze is None:
             return None
         return find_shortest_path(self.maze, self.entry, self.exit_)
