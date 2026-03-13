@@ -1,4 +1,38 @@
+# Python cache and compiled files
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+
+# Type checking cache
 .mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Virtual environments
 .venv/
+venv/
+ENV/
+env/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test files (development only)
+test_*.py
+*_test.py
+VERIFICATION_REPORT.txt
+PARSER_TEST_SUMMARY.txt
+
+# Output files (generated)
+output_maze.txt
+*.txt.bak
+
+# OS files
+.DS_Store
+Thumbs.db

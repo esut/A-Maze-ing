@@ -1,3 +1,5 @@
+.PHONY: install run debug clean lint lint-strict
+
 install:
 	pip install flake8 mypy
 
@@ -8,9 +10,16 @@ debug:
 	python3 -m pdb a_maze_ing.py config.txt
 
 clean:
+	rm -rf __pycache__
 	rm -rf maze/__pycache__
 	rm -rf .mypy_cache
+	rm -rf *.pyc
+	rm -rf maze/*.pyc
 
 lint:
 	flake8 .
 	mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+
+lint-strict:
+	flake8 .
+	mypy . --strict

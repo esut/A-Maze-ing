@@ -19,36 +19,44 @@ MENU: int = 6
 BG: int = 7
 
 THEMES: List[Tuple[int, int]] = [
-    (curses.COLOR_WHITE,   curses.COLOR_BLACK),
-    (curses.COLOR_YELLOW,  curses.COLOR_BLACK),
-    (curses.COLOR_GREEN,   curses.COLOR_BLACK),
-    (curses.COLOR_CYAN,    curses.COLOR_BLACK),
+    (curses.COLOR_WHITE, curses.COLOR_BLACK),
+    (curses.COLOR_YELLOW, curses.COLOR_BLACK),
+    (curses.COLOR_GREEN, curses.COLOR_BLACK),
+    (curses.COLOR_CYAN, curses.COLOR_BLACK),
     (curses.COLOR_MAGENTA, curses.COLOR_BLACK),
-    (curses.COLOR_RED,     curses.COLOR_BLACK),
-    (curses.COLOR_BLUE,    curses.COLOR_BLACK),
+    (curses.COLOR_RED, curses.COLOR_BLACK),
+    (curses.COLOR_BLUE, curses.COLOR_BLACK),
 ]
-THEME_NAMES: List[str] = ["White", "Yellow", "Green", "Cyan", "Magenta", "Red", "Blue"]
+THEME_NAMES: List[str] = [
+    "White", "Yellow", "Green", "Cyan", "Magenta", "Red", "Blue"
+]
 
 
 def init_colors(theme: int) -> None:
     """Set up curses colors for the chosen theme.
-    
+
     Args:
         theme: Theme index to apply
     """
     fg, bg = THEMES[theme % len(THEMES)]
-    curses.init_pair(WALL,  fg,                   bg)
-    curses.init_pair(PATH,  curses.COLOR_CYAN,    bg)
-    curses.init_pair(ENTRY, curses.COLOR_GREEN,   bg)
-    curses.init_pair(EXIT,  curses.COLOR_RED,     bg)
-    curses.init_pair(C42,   curses.COLOR_MAGENTA, bg)
-    curses.init_pair(MENU,  curses.COLOR_BLACK,   curses.COLOR_WHITE)
-    curses.init_pair(BG,    curses.COLOR_BLACK,   bg)
+    curses.init_pair(WALL, fg, bg)
+    curses.init_pair(PATH, curses.COLOR_CYAN, bg)
+    curses.init_pair(ENTRY, curses.COLOR_GREEN, bg)
+    curses.init_pair(EXIT, curses.COLOR_RED, bg)
+    curses.init_pair(C42, curses.COLOR_MAGENTA, bg)
+    curses.init_pair(MENU, curses.COLOR_BLACK, curses.COLOR_WHITE)
+    curses.init_pair(BG, curses.COLOR_BLACK, bg)
 
 
-def draw_maze(scr: Any, maze: List[List[int]], entry: Tuple[int, int], exit_: Tuple[int, int], path_set: Set[Tuple[int, int]], cells_42: Set[Tuple[int, int]]) -> None:
+def draw_maze(
+        scr: Any,
+        maze: List[List[int]],
+        entry: Tuple[int, int],
+        exit_: Tuple[int, int],
+        path_set: Set[Tuple[int, int]],
+        cells_42: Set[Tuple[int, int]]) -> None:
     """Draw the maze on the terminal screen.
-    
+
     Args:
         scr: Curses screen object
         maze: 2D grid where each cell is a bitmask of walls
@@ -72,30 +80,33 @@ def draw_maze(scr: Any, maze: List[List[int]], entry: Tuple[int, int], exit_: Tu
             ch: str
             color: int
             if pos == entry:
-                ch, color = "E", curses.color_pair(ENTRY) | curses.A_BOLD
+                ch = "E"
+                color = curses.color_pair(ENTRY) | curses.A_BOLD
             elif pos == exit_:
-                ch, color = "X", curses.color_pair(EXIT)  | curses.A_BOLD
+                ch = "X"
+                color = curses.color_pair(EXIT) | curses.A_BOLD
             elif pos in path_set:
                 ch, color = ".", curses.color_pair(PATH)
             elif pos in cells_42:
-                ch, color = "#", curses.color_pair(C42)   | curses.A_BOLD
+                ch = "#"
+                color = curses.color_pair(C42) | curses.A_BOLD
             else:
                 ch, color = " ", bg_col
 
             top: str = "---" if (cell & NORTH) else "   "
-            left: str = "|"   if (cell & WEST)  else " "
+            left: str = "|" if (cell & WEST) else " "
 
             try:
-                scr.addstr(row,     col,     "+",       wall_col)
-                scr.addstr(row,     col + 1, top,       wall_col)
-                scr.addstr(row + 1, col,     left,      wall_col)
+                scr.addstr(row, col, "+", wall_col)
+                scr.addstr(row, col + 1, top, wall_col)
+                scr.addstr(row + 1, col, left, wall_col)
                 scr.addstr(row + 1, col + 1, f" {ch} ", color)
             except curses.error:
                 pass
 
         try:
             right: str = "|" if (maze[y][width - 1] & EAST) else " "
-            scr.addstr(y * 2,     width * 4, "+",   wall_col)
+            scr.addstr(y * 2, width * 4, "+", wall_col)
             scr.addstr(y * 2 + 1, width * 4, right, wall_col)
         except curses.error:
             pass
@@ -103,7 +114,7 @@ def draw_maze(scr: Any, maze: List[List[int]], entry: Tuple[int, int], exit_: Tu
     for x in range(width):
         bot: str = "---" if (maze[height - 1][x] & SOUTH) else "   "
         try:
-            scr.addstr(height * 2, x * 4,     "+", wall_col)
+            scr.addstr(height * 2, x * 4, "+", wall_col)
             scr.addstr(height * 2, x * 4 + 1, bot, wall_col)
         except curses.error:
             pass
@@ -113,9 +124,14 @@ def draw_maze(scr: Any, maze: List[List[int]], entry: Tuple[int, int], exit_: Tu
         pass
 
 
-def draw_menu(scr: Any, row: int, show_path: bool, show_42: bool, theme: int) -> None:
+def draw_menu(
+        scr: Any,
+        row: int,
+        show_path: bool,
+        show_42: bool,
+        theme: int) -> None:
     """Draw the keyboard controls below the maze.
-    
+
     Args:
         scr: Curses screen object
         row: Row position to draw the menu
@@ -124,22 +140,33 @@ def draw_menu(scr: Any, row: int, show_path: bool, show_42: bool, theme: int) ->
         theme: Current theme index
     """
     p: str = "Hide Path" if show_path else "Show Path"
-    f42: str = "Hide 42"   if show_42   else "Show 42"
+    f42: str = "Hide 42" if show_42 else "Show 42"
     col: str = THEME_NAMES[theme % len(THEME_NAMES)]
     try:
-        scr.addstr(row, 0, " === A-Maze-ing === ", curses.color_pair(MENU))
-        scr.addstr(row + 1, 0,
-                   f" [R] New maze  [P] {p}  [C] Color:{col}  [4] {f42}  [Q] Quit ",
-                   curses.color_pair(WALL))
+        scr.addstr(row, 0, " === A-Maze-ing === ",
+                   curses.color_pair(MENU))
+        menu_text = (
+            f" [R] New maze  [P] {p}  [C] Color:{col}  "
+            f"[4] {f42}  [Q] Quit "
+        )
+        scr.addstr(row + 1, 0, menu_text, curses.color_pair(WALL))
     except curses.error:
         pass
 
 
-def display_maze(maze: List[List[int]], entry: Tuple[int, int], exit_: Tuple[int, int], width: int, height: int, perfect: bool = True, seed: int | None = None) -> None:
+def display_maze(
+        maze: List[List[int]],
+        entry: Tuple[int, int],
+        exit_: Tuple[int, int],
+        width: int,
+        height: int,
+        perfect: bool = True,
+        seed: int | None = None) -> None:
     """Show the maze in the terminal with keyboard controls.
 
-    Keys: R=new maze, P=show/hide path, C=change color, 4=show/hide 42, Q=quit
-    
+    Keys: R=new maze, P=show/hide path, C=change color,
+          4=show/hide 42, Q=quit
+
     Args:
         maze: 2D grid where each cell is a bitmask of walls
         entry: Entry coordinates (x, y)
@@ -161,7 +188,8 @@ def display_maze(maze: List[List[int]], entry: Tuple[int, int], exit_: Tuple[int
         show_42: bool = False
         init_colors(theme)
 
-        path: List[Tuple[int, int]] | None = find_shortest_path(maze, entry, exit_)
+        path: List[Tuple[int, int]] | None
+        path = find_shortest_path(maze, entry, exit_)
 
         while True:
             scr.clear()
@@ -169,8 +197,17 @@ def display_maze(maze: List[List[int]], entry: Tuple[int, int], exit_: Tuple[int
             _: int
             max_y, _ = scr.getmaxyx()
 
-            path_set: Set[Tuple[int, int]] = set(path) if path and show_path else set()
-            c42_set: Set[Tuple[int, int]] = set(get_42_cells(width, height)) if show_42 else set()
+            path_set: Set[Tuple[int, int]]
+            if path and show_path:
+                path_set = set(path)
+            else:
+                path_set = set()
+
+            c42_set: Set[Tuple[int, int]]
+            if show_42:
+                c42_set = set(get_42_cells(width, height))
+            else:
+                c42_set = set()
 
             draw_maze(scr, maze, entry, exit_, path_set, c42_set)
 

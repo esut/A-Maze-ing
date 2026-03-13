@@ -9,10 +9,10 @@ from maze.display import display_maze
 
 def validate_config(config: Dict[str, Any]) -> None:
     """Validate configuration values.
-    
+
     Args:
         config: Configuration dictionary
-    
+
     Raises:
         ValueError: If configuration values are invalid
     """
@@ -48,8 +48,12 @@ def main() -> None:
         exit_: tuple[int, int] = config["EXIT"]
         perfect: bool = config["PERFECT"]
 
-        generator: MazeGenerator = MazeGenerator(config["WIDTH"], config["HEIGHT"], seed)
-        maze = generator.generate(entry=entry, exit_=exit_, perfect=perfect)
+        generator: MazeGenerator = MazeGenerator(
+            config["WIDTH"], config["HEIGHT"], seed
+        )
+        maze = generator.generate(
+            entry=entry, exit_=exit_, perfect=perfect
+        )
 
         path: str = solve_maze(maze, entry, exit_)
 

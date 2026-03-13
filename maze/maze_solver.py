@@ -16,6 +16,9 @@ def solve_maze(
     Returns:
         String of directions (N, E, S, W) or empty string if no path
     """
+    height: int = len(maze)
+    width: int = len(maze[0])
+
     queue: deque[Tuple[Tuple[int, int], str]] = deque([(start, "")])
     visited: Set[Tuple[int, int]] = set([start])
 
@@ -41,7 +44,8 @@ def solve_maze(
             nx: int = x + dx
             ny: int = y + dy
 
-            if (nx, ny) not in visited:
+            if (0 <= nx < width and 0 <= ny < height
+                    and (nx, ny) not in visited):
 
                 visited.add((nx, ny))
                 queue.append(((nx, ny), path + letter))
