@@ -79,7 +79,10 @@ def draw_maze(
             pos: Tuple[int, int] = (x, y)
             ch: str
             color: int
-            if pos == entry:
+            if pos in cells_42:
+                ch = "#"
+                color = curses.color_pair(C42) | curses.A_BOLD
+            elif pos == entry:
                 ch = "E"
                 color = curses.color_pair(ENTRY) | curses.A_BOLD
             elif pos == exit_:
@@ -87,14 +90,14 @@ def draw_maze(
                 color = curses.color_pair(EXIT) | curses.A_BOLD
             elif pos in path_set:
                 ch, color = ".", curses.color_pair(PATH)
-            elif pos in cells_42:
-                ch = "#"
-                color = curses.color_pair(C42) | curses.A_BOLD
             else:
                 ch, color = " ", bg_col
 
-            top: str = "---" if (cell & NORTH) else "   "
-            left: str = "|" if (cell & WEST) else " "
+            top: str = (
+                "---" if (cell & NORTH) and pos not in cells_42
+                else "   "
+            )
+            left: str = "|" if (cell & WEST) and pos not in cells_42 else " "
 
             try:
                 scr.addstr(row, col, "+", wall_col)

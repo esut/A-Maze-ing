@@ -189,6 +189,13 @@ def embed_42_pattern(
 
     blocked: Set[Tuple[int, int]] = set(cells)
 
+    if entry in blocked:
+        print(f"Warning: ENTRY {entry} is inside the 42 pattern, skipping 42")
+        return False
+    if exit_ in blocked:
+        print(f"Warning: EXIT {exit_} is inside the 42 pattern, skipping 42")
+        return False
+
     for x, y in cells:
         maze[y][x] = 15
         if y > 0:
@@ -270,6 +277,19 @@ class MazeGenerator:
         """
         if exit_ is None:
             exit_ = (self.width - 1, self.height - 1)
+
+        blocked: Set[Tuple[int, int]] = set(
+            get_42_cells(self.width, self.height)
+        )
+        if entry in blocked:
+            raise ValueError(
+                f"ENTRY {entry} overlaps with the '42' pattern"
+            )
+        if exit_ in blocked:
+            raise ValueError(
+                f"EXIT {exit_} overlaps with the '42' pattern"
+            )
+
         self.entry = entry
         self.exit_ = exit_
         self.maze = generate_maze(
