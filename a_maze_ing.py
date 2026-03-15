@@ -1,7 +1,7 @@
 import sys
 from typing import Dict, Any, Optional
 from maze.config_parser import parse_config
-from maze.maze_generator import MazeGenerator
+from maze.maze_generator import MazeGenerator, get_42_cells
 from maze.maze_solver import solve_maze
 from maze.maze_writer import write_maze
 from maze.display import display_maze
@@ -29,6 +29,16 @@ def validate_config(config: Dict[str, Any]) -> None:
         raise ValueError("EXIT coordinates are outside the maze")
     if entry == exit_:
         raise ValueError("ENTRY and EXIT must be different")
+
+    blocked = set(get_42_cells(width, height))
+    if entry in blocked:
+        raise ValueError(
+            f"ENTRY {entry} overlaps with the '42' pattern cells"
+        )
+    if exit_ in blocked:
+        raise ValueError(
+            f"EXIT {exit_} overlaps with the '42' pattern cells"
+        )
 
 
 def main() -> None:
