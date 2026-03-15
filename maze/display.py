@@ -42,7 +42,7 @@ def init_colors(theme: int) -> None:
     """
     fg, bg = THEMES[theme % len(THEMES)]
     curses.init_pair(WALL,  fg,                    bg)
-    curses.init_pair(PATH,  curses.COLOR_YELLOW,   curses.COLOR_BLUE)
+    curses.init_pair(PATH,  curses.COLOR_YELLOW,   bg)
     curses.init_pair(ENTRY, curses.COLOR_BLACK,    curses.COLOR_GREEN)
     curses.init_pair(EXIT,  curses.COLOR_BLACK,    curses.COLOR_RED)
     curses.init_pair(C42,   curses.COLOR_MAGENTA,  bg)
