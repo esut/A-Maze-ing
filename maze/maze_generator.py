@@ -61,7 +61,9 @@ def generate_maze(
                     carve(nx, ny)
 
     sys.setrecursionlimit(width * height * 2 + 100)
-    carve(0, 0)
+    start_x = rng.randrange(width)
+    start_y = rng.randrange(height)
+    carve(start_x, start_y)
 
     ex, ey = entry
     fx, fy = exit_
@@ -69,10 +71,10 @@ def generate_maze(
         maze[ey][ex] &= ~NORTH
     elif ey == height - 1:
         maze[ey][ex] &= ~SOUTH
-    if fy == 0:
-        maze[fy][fx] &= ~NORTH
-    elif fy == height - 1:
-        maze[fy][fx] &= ~SOUTH
+    elif ex == 0:
+        maze[ey][ex] &= ~WEST
+    elif ex == width - 1:
+        maze[ey][ex] &= ~EAST
 
     return maze
 
@@ -113,7 +115,8 @@ def find_shortest_path(
                 cur = parent[cur]
             path.reverse()
             return path
-
+        dirs = MOVES[:]
+        random.shuffle(dirs)
         for dx, dy, wall in MOVES:
             nx, ny = cx + dx, cy + dy
             if (0 <= nx < width and 0 <= ny < height
