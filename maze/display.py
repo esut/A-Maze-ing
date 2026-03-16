@@ -233,21 +233,22 @@ def draw_menu(
     menu_color = curses.color_pair(MENU)
     wall_color = curses.color_pair(WALL)
 
-    p_label = "Hide Path" if show_path else "Show Path"
-    s_label = f"Slow Path ({'ON ' if slow_mode else 'OFF'})"
-    f42_label = f"Toggle 42  ({C42_NAMES[c42_theme % len(C42_NAMES)]})"
-    c_label = f"Color      ({THEME_NAMES[theme % len(THEME_NAMES)]})"
+    p = "ON " if show_path else "OFF"
+    s = "ON " if slow_mode else "OFF"
+    c = THEME_NAMES[theme % len(THEME_NAMES)]
+    c42 = C42_NAMES[c42_theme % len(C42_NAMES)]
+    f42 = "ON " if show_42 else "OFF"
 
     lines = [
         "=====================",
-        "     A-Maze-ing      ",
+        "|   A-Maze-ing      |",
         "=====================",
         "| R | New Maze      |",
-        f"| P | {p_label:<14}|",
-        f"| S | {s_label:<14}|",
-        f"| C | {c_label:<14}|",
-        f"| 4 | {f42_label:<14}|",
-        "| Q | Quit           |",
+        f"| P | Path    [{p}] |",
+        f"| S | Slow    [{s}] |",
+        f"| C | {c:<13}  |",
+        f"| 4 | 42[{f42}] {c42:<5} |",
+        "| Q | Quit          |",
         "=====================",
     ]
 
