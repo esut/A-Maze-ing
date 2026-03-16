@@ -1,6 +1,6 @@
 import curses
 import random
-from typing import List, Tuple, Set, Any
+from typing import List, Tuple, Set, Any, Optional
 
 from .maze_generator import (
     NORTH, EAST, SOUTH, WEST,
@@ -10,6 +10,7 @@ from .maze_generator import (
     get_42_cells,
 )
 
+# Color pair IDs
 WALL: int = 1
 PATH: int = 2
 ENTRY: int = 3
@@ -18,6 +19,7 @@ C42: int = 5
 MENU: int = 6
 BG: int = 7
 
+# Wall color themes (foreground, background)
 THEMES: List[Tuple[int, int]] = [
     (curses.COLOR_WHITE, curses.COLOR_BLACK),
     (curses.COLOR_YELLOW, curses.COLOR_BLACK),
@@ -31,19 +33,35 @@ THEME_NAMES: List[str] = [
     "White", "Yellow", "Green", "Cyan", "Magenta", "Red", "Blue"
 ]
 
+# BONUS 1: Color options for the '42' pattern
+C42_COLORS: List[Tuple[int, int]] = [
+    (curses.COLOR_MAGENTA, curses.COLOR_BLACK),
+    (curses.COLOR_YELLOW, curses.COLOR_BLACK),
+    (curses.COLOR_RED, curses.COLOR_BLACK),
+    (curses.COLOR_CYAN, curses.COLOR_BLACK),
+    (curses.COLOR_GREEN, curses.COLOR_BLACK),
+    (curses.COLOR_BLUE, curses.COLOR_BLACK),
+    (curses.COLOR_WHITE, curses.COLOR_BLACK),
+]
+C42_COLOR_NAMES: List[str] = [
+    "Magenta", "Yellow", "Red", "Cyan", "Green", "Blue", "White"
+]
 
-def init_colors(theme: int) -> None:
-    """Set up curses colors for the chosen theme.
+
+def init_colors(theme: int, c42_theme: int) -> None:
+    """Set up curses colors for the chosen wall theme and '42' color.
 
     Args:
-        theme: Theme index to apply
+        theme: Wall color theme index
+        c42_theme: '42' pattern color index
     """
     fg, bg = THEMES[theme % len(THEMES)]
+    c42_fg, c42_bg = C42_COLORS[c42_theme % len(C42_COLORS)]
     curses.init_pair(WALL, fg, bg)
     curses.init_pair(PATH, curses.COLOR_CYAN, bg)
     curses.init_pair(ENTRY, curses.COLOR_GREEN, bg)
     curses.init_pair(EXIT, curses.COLOR_RED, bg)
-    curses.init_pair(C42, curses.COLOR_MAGENTA, bg)
+    curses.init_pair(C42, c42_fg, c42_bg)
     curses.init_pair(MENU, curses.COLOR_BLACK, curses.COLOR_WHITE)
     curses.init_pair(BG, curses.COLOR_BLACK, bg)
 
@@ -129,29 +147,95 @@ def draw_menu(
         row: int,
         show_path: bool,
         show_42: bool,
-        theme: int) -> None:
-    """Draw the keyboard controls below the maze.
+        theme: int,
+        c42_theme: int,
+        path_len: int,
+        width: int,
+        height: int,
+        seed: Optional[int],
+        maze_count: int) -> None:
+    """Draw the keyboard controls and info below the maze.
 
     Args:
         scr: Curses screen object
         row: Row position to draw the menu
         show_path: Whether path is currently shown
         show_42: Whether '42' pattern is currently shown
-        theme: Current theme index
+        theme: Current wall theme index
+        c42_theme: Current '42' color index
+        path_len: Length of the shortest path (0 = no path)
+        width: Maze width in cells
+        height: Maze height in cells
+        seed: Current random seed (None if not set)
+        maze_count: How many mazes have been generated so far
     """
-    p: str = "Hide Path" if show_path else "Show Path"
+    p: str = "Hide" if show_path else "Show"
     f42: str = "Hide 42" if show_42 else "Show 42"
-    col: str = THEME_NAMES[theme % len(THEME_NAMES)]
+    col_name: str = THEME_NAMES[theme % len(THEME_NAMES)]
+    c42_name: str = C42_COLOR_NAMES[c42_theme % len(C42_COLOR_NAMES)]
+
     try:
         scr.addstr(row, 0, " === A-Maze-ing === ",
                    curses.color_pair(MENU))
-        menu_text = (
-            f" [R] New maze  [P] {p}  [C] Color:{col}  "
-            f"[4] {f42}  [Q] Quit "
+
+        # Line 1: main controls
+        line1 = (
+            f" [R]New  [P]{p}Path  [C]Color:{col_name}"
+            f"  [4]{f42}  [K]42Color:{c42_name}  [Q]Quit "
         )
-        scr.addstr(row + 1, 0, menu_text, curses.color_pair(WALL))
+        scr.addstr(row + 1, 0, line1, curses.color_pair(WALL))
+
+        # BONUS 2: maze info line (size, seed, generation count)
+        seed_str = str(seed) if seed is not None else "random"
+        info = (
+            f" Size:{width}x{height}  Seed:{seed_str}"
+            f"  Maze#{maze_count}"
+        )
+        # BONUS 3: path length
+        if path_len > 0:
+            info += f"  PathLen:{path_len}"
+        else:
+            info += "  PathLen:N/A"
+
+        scr.addstr(row + 2, 0, info, curses.color_pair(WALL))
+
+        # BONUS 4: save hint
+        scr.addstr(row + 3, 0,
+                   " [S]Save maze to file ",
+                   curses.color_pair(WALL))
     except curses.error:
         pass
+
+
+def save_maze_to_file(
+        maze: List[List[int]],
+        entry: Tuple[int, int],
+        exit_: Tuple[int, int],
+        seed: Optional[int],
+        maze_count: int) -> str:
+    """Save the current maze as a text file.
+
+    The file is named 'maze_<seed>_<count>.txt'.
+
+    Args:
+        maze: 2D grid of wall bitmasks
+        entry: Entry coordinates
+        exit_: Exit coordinates
+        seed: Current seed value
+        maze_count: Generation counter
+
+    Returns:
+        The filename that was written
+    """
+    seed_str = str(seed) if seed is not None else "rnd"
+    filename: str = f"maze_{seed_str}_{maze_count}.txt"
+
+    from .maze_writer import write_maze
+    from .maze_solver import solve_maze
+
+    path_str: str = solve_maze(maze, entry, exit_)
+    write_maze(filename, maze, entry, exit_, path_str)
+    return filename
 
 
 def display_maze(
@@ -161,11 +245,20 @@ def display_maze(
         width: int,
         height: int,
         perfect: bool = True,
-        seed: int | None = None) -> None:
+        seed: Optional[int] = None) -> None:
     """Show the maze in the terminal with keyboard controls.
 
-    Keys: R=new maze, P=show/hide path, C=change color,
-          4=show/hide 42, Q=quit
+    Keys:
+        R = generate a new random maze
+        P = show / hide the shortest path
+        C = cycle wall color theme
+        4 = show / hide the '42' pattern
+        K = cycle the '42' pattern color  (BONUS 1)
+        S = save current maze to a .txt file  (BONUS 4)
+        Q = quit
+
+    The status bar shows maze size, seed, generation counter,
+    and path length.  (BONUS 2 & 3)
 
     Args:
         maze: 2D grid where each cell is a bitmask of walls
@@ -184,12 +277,17 @@ def display_maze(
         curses.use_default_colors()
 
         theme: int = 0
+        c42_theme: int = 0          # BONUS 1: '42' color index
         show_path: bool = False
         show_42: bool = False
-        init_colors(theme)
+        maze_count: int = 1         # BONUS 2: generation counter
+        init_colors(theme, c42_theme)
 
-        path: List[Tuple[int, int]] | None
+        path: Optional[List[Tuple[int, int]]]
         path = find_shortest_path(maze, entry, exit_)
+        path_len: int = len(path) if path else 0  # BONUS 3
+
+        status_msg: str = ""        # BONUS 4: save feedback message
 
         while True:
             scr.clear()
@@ -212,13 +310,29 @@ def display_maze(
             draw_maze(scr, maze, entry, exit_, path_set, c42_set)
 
             menu_row: int = height * 2 + 2
-            if menu_row + 2 < max_y:
-                draw_menu(scr, menu_row, show_path, show_42, theme)
+            if menu_row + 4 < max_y:
+                draw_menu(
+                    scr, menu_row,
+                    show_path, show_42,
+                    theme, c42_theme,
+                    path_len, width, height,
+                    seed, maze_count
+                )
+
+            # Show save feedback message (BONUS 4)
+            if status_msg and menu_row + 5 < max_y:
+                try:
+                    scr.addstr(menu_row + 4, 0,
+                               f" {status_msg} ",
+                               curses.color_pair(ENTRY))
+                except curses.error:
+                    pass
 
             scr.refresh()
 
             key: int = scr.getch()
             ch: str = chr(key).upper() if 0 <= key < 256 else ""
+            status_msg = ""  # clear previous message
 
             if ch == "Q":
                 break
@@ -228,15 +342,29 @@ def display_maze(
                 maze = generate_maze(width, height, entry, exit_, seed)
                 embed_42_pattern(maze, width, height, entry, exit_)
                 path = find_shortest_path(maze, entry, exit_)
+                path_len = len(path) if path else 0
+                maze_count += 1
 
             elif ch == "P":
                 show_path = not show_path
 
             elif ch == "C":
                 theme = (theme + 1) % len(THEMES)
-                init_colors(theme)
+                init_colors(theme, c42_theme)
 
             elif ch == "4":
                 show_42 = not show_42
+
+            elif ch == "K":
+                # BONUS 1: cycle '42' pattern color
+                c42_theme = (c42_theme + 1) % len(C42_COLORS)
+                init_colors(theme, c42_theme)
+
+            elif ch == "S":
+                # BONUS 4: save maze to file
+                filename = save_maze_to_file(
+                    maze, entry, exit_, seed, maze_count
+                )
+                status_msg = f"Saved to {filename}"
 
     curses.wrapper(run)

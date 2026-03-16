@@ -36,8 +36,8 @@ def generate_maze(
     Args:
         width: Maze width in cells
         height: Maze height in cells
-        entry: Entry coordinates (x, y)
-        exit_: Exit coordinates (x, y)
+        entry: Entry coordinates (x, y) - must be on the border
+        exit_: Exit coordinates (x, y) - must be on the border
         seed: Random seed for reproducibility
 
     Returns:
@@ -49,6 +49,7 @@ def generate_maze(
     visited: List[List[bool]] = [[False] * width for _ in range(height)]
 
     def carve(x: int, y: int) -> None:
+        """Recursively carve passages from cell (x, y)."""
         visited[y][x] = True
         dirs: List[Tuple[int, int, int]] = MOVES[:]
         rng.shuffle(dirs)
@@ -63,18 +64,38 @@ def generate_maze(
     sys.setrecursionlimit(width * height * 2 + 100)
     carve(0, 0)
 
-    ex, ey = entry
-    fx, fy = exit_
-    if ey == 0:
-        maze[ey][ex] &= ~NORTH
-    elif ey == height - 1:
-        maze[ey][ex] &= ~SOUTH
-    if fy == 0:
-        maze[fy][fx] &= ~NORTH
-    elif fy == height - 1:
-        maze[fy][fx] &= ~SOUTH
+    # Open the correct border wall for entry and exit
+    _open_border(maze, entry, width, height)
+    _open_border(maze, exit_, width, height)
 
     return maze
+
+
+def _open_border(
+        maze: List[List[int]],
+        pos: Tuple[int, int],
+        width: int,
+        height: int) -> None:
+    """Remove the outer border wall for an entry or exit cell.
+
+    Priority order: top row -> NORTH, bottom row -> SOUTH,
+    left col -> WEST, right col -> EAST.
+
+    Args:
+        maze: 2D grid of wall bitmasks
+        pos: (x, y) coordinates of the border cell
+        width: Maze width
+        height: Maze height
+    """
+    x, y = pos
+    if y == 0:
+        maze[y][x] &= ~NORTH
+    elif y == height - 1:
+        maze[y][x] &= ~SOUTH
+    elif x == 0:
+        maze[y][x] &= ~WEST
+    elif x == width - 1:
+        maze[y][x] &= ~EAST
 
 
 def find_shortest_path(
@@ -159,7 +180,6 @@ def get_42_cells(width: int, height: int) -> List[Tuple[int, int]]:
     for dx, dy in four:
         cells.append((ox + dx, oy + dy))
     for dx, dy in two:
-        # '2' is 4 columns right of '4'
         cells.append((ox + 4 + dx, oy + dy))
 
     return [(x, y) for x, y in cells if 0 <= x < width and 0 <= y < height]
@@ -185,6 +205,7 @@ def embed_42_pattern(
     """
     cells: List[Tuple[int, int]] = get_42_cells(width, height)
     if not cells:
+        print("Warning: maze is too small to display the '42' pattern.")
         return False
 
     blocked: Set[Tuple[int, int]] = set(cells)
@@ -192,13 +213,13 @@ def embed_42_pattern(
     for x, y in cells:
         maze[y][x] = 15
         if y > 0:
-            maze[y-1][x] |= SOUTH
+            maze[y - 1][x] |= SOUTH
         if y < height - 1:
-            maze[y+1][x] |= NORTH
+            maze[y + 1][x] |= NORTH
         if x > 0:
-            maze[y][x-1] |= EAST
+            maze[y][x - 1] |= EAST
         if x < width - 1:
-            maze[y][x+1] |= WEST
+            maze[y][x + 1] |= WEST
 
     if find_shortest_path(maze, entry, exit_) is not None:
         return True
@@ -261,7 +282,7 @@ class MazeGenerator:
         """Generate a new maze and embed the '42' pattern.
 
         Args:
-            entry: Entry coordinates (x, y)
+            entry: Entry coordinates (x, y) - must be on the border
             exit_: Exit coordinates (x, y), defaults to bottom-right
             perfect: Whether to generate a perfect maze
 

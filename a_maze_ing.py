@@ -23,12 +23,29 @@ def validate_config(config: Dict[str, Any]) -> None:
 
     if width <= 0 or height <= 0:
         raise ValueError("WIDTH and HEIGHT must be positive integers")
+
     if not (0 <= entry[0] < width and 0 <= entry[1] < height):
         raise ValueError("ENTRY coordinates are outside the maze")
     if not (0 <= exit_[0] < width and 0 <= exit_[1] < height):
         raise ValueError("EXIT coordinates are outside the maze")
     if entry == exit_:
         raise ValueError("ENTRY and EXIT must be different")
+
+    # Entry and exit must be on the border
+    def on_border(x: int, y: int) -> bool:
+        """Return True if (x, y) is on the maze border."""
+        return x == 0 or x == width - 1 or y == 0 or y == height - 1
+
+    if not on_border(*entry):
+        raise ValueError(
+            f"ENTRY {entry} must be on the maze border "
+            f"(x=0, x={width-1}, y=0, or y={height-1})"
+        )
+    if not on_border(*exit_):
+        raise ValueError(
+            f"EXIT {exit_} must be on the maze border "
+            f"(x=0, x={width-1}, y=0, or y={height-1})"
+        )
 
 
 def main() -> None:
