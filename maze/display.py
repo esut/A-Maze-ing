@@ -318,9 +318,10 @@ def display_maze(
             draw_maze(scr, maze, entry, exit_, path_cells, cells_42)
 
             menu_row = height * 2 + 2
-            if menu_row + 10 < max_y:
-                draw_menu(scr, menu_row, show_path, slow_mode,
-                          show_42, theme, c42_theme)
+            draw_menu(
+                scr, menu_row, show_path,
+                slow_mode, show_42, theme, c42_theme
+            )
 
             scr.refresh()
 
