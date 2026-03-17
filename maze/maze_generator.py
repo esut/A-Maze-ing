@@ -67,7 +67,6 @@ def generate_maze(
 
     ex, ey = entry
     fx, fy = exit_
-    
 
     return maze
 

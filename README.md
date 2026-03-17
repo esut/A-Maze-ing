@@ -109,6 +109,22 @@ The algorithm starts with all walls closed and carves passages by:
 
 **Alternatives considered:** Prim's (more uniform but slower), Kruskal's (better for parallel processing), Recursive Division (faster but more regular patterns).
 
+## Package Installation
+
+### Install via pip
+
+```bash
+pip install mazegen-1.0.0-py3-none-any.whl
+```
+
+### Run after installation
+
+```bash
+mazegen
+# or with a custom config
+mazegen config.txt
+```
+
 ## Code Reusability
 
 ### Reusable Module

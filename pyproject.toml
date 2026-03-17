@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mazegen"
+version = "1.0.0"
+description = "Random perfect maze generator using DFS recursive backtracker"
+requires-python = ">=3.10"
+
+[project.scripts]
+mazegen = "maze._entry:main"
+
+[tool.setuptools]
+packages = ["maze"]
+
+[tool.setuptools.package-data]
+maze = ["config.txt"]
+
+
