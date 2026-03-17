@@ -110,7 +110,7 @@ def find_shortest_path(
             return path
         dirs = MOVES[:]
         random.shuffle(dirs)
-        for dx, dy, wall in MOVES:
+        for dx, dy, wall in dirs:
             nx, ny = cx + dx, cy + dy
             if (0 <= nx < width and 0 <= ny < height
                     and not visited[ny][nx]

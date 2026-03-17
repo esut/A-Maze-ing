@@ -365,12 +365,8 @@ def display_maze(
                 else:
                     show_42 = True
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    curses.wrapper(run)
-=======
+
     # curses.wrapper handles terminal setup/teardown safely
-=======
->>>>>>> afb66ee (Add bonus features: 42 color cycle, slow path, new menu UI)
+
     curses.wrapper(run)
->>>>>>> 5962f05 (fix path display)
+
