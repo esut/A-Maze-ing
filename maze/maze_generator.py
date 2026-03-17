@@ -67,14 +67,7 @@ def generate_maze(
 
     ex, ey = entry
     fx, fy = exit_
-    if ey == 0:
-        maze[ey][ex] &= ~NORTH
-    elif ey == height - 1:
-        maze[ey][ex] &= ~SOUTH
-    elif ex == 0:
-        maze[ey][ex] &= ~WEST
-    elif ex == width - 1:
-        maze[ey][ex] &= ~EAST
+    
 
     return maze
 
