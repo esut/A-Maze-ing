@@ -248,6 +248,7 @@ def draw_menu(
         f"| S | Slow    [{s}] |",
         f"| C | {c:<13}  |",
         f"| 4 | 42[{f42}] {c42:<5} |",
+        "| 5 | Hide 42       |",
         "| Q | Quit          |",
         "=====================",
     ]
@@ -365,8 +366,9 @@ def display_maze(
                 else:
                     show_42 = True
 
+            elif ch == "5":  # hide the 42 pattern
+                show_42 = False
 
-    # curses.wrapper handles terminal setup/teardown safely
 
+# curses.wrapper handles terminal setup/teardown safely
     curses.wrapper(run)
-
